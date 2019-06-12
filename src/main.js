@@ -8,7 +8,6 @@ Vue.config.debug = isDebug_mode;
 Vue.config.devtools = isDebug_mode;
 Vue.config.productionTip = isDebug_mode;
 
-Vue.config.productionTip = false;
 Vue.prototype.$util = Util;
 new Vue({
     render: h => h(App),
