@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import {Util} from "./utils/util";
+import Util from "./utils/Util";
 
 //关闭vue-dev-tool
 const isDebug_mode = process.env.NODE_ENV !== 'production';

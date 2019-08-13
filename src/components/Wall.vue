@@ -9,120 +9,70 @@
             <audio id="player5" src="http://leenwong.cn/get/voice/6.wav"></audio>
         </div>
         <div class="bar"></div>
-        <div class="timer">
-            <span class="number">{{result.days}}</span>
-            &nbsp;<div class="day">☀️</div>&nbsp;
-            <span class="number">{{result.hours}}</span>
-            :
-            <span class="number">{{result.minutes}}</span>
-            :
-            <span class="number">{{result.seconds}}</span>
-        </div>
         <div class="center"></div>
         <img @click="showPostDialog" class="avatar" src="../assets/avatar.jpg">
     </div>
 </template>
 
 <script>
+    import Avatar from "../utils/Avatar";
+    import DataInterface from "../utils/DataInterface";
+    import Loop from "../utils/Loop";
+    import Ring from "../utils/Ring";
+
     export default {
         name: "Wall",
         data() {
             return {
                 messageList: [],
-                postTags: '',
-                postTag: '🥟',
-                startDate: '2019/3/13 15:27:10',
-                result: {days: 0, hours: 0, minutes: 0, seconds: 0},
-                weather: ['☀', '🌤', '☔', '🌨', '🌩'],
-                tag: '🥟',
-                linked: false,
-                showQR: false,
+                loop: new Loop(),
+                titleRing: new Ring(['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘']),
             }
         },
         mounted() {
-            /**
-             * 获取消息列表
-             */
-            this.getMessageList().then(() => this.showBarrage());
-
-            setInterval(() => {
-                let date1 = new Date(this.startDate);  //开始时间
-                let date2 = new Date();    //结束时间
-                let date3 = date2.getTime() - date1.getTime(); //时间差的毫秒数
-                //计算出相差天数
-                let days = Math.floor(date3 / (24 * 3600 * 1000));
-                //计算出小时数
-                let leave1 = date3 % (24 * 3600 * 1000);  //计算天数后剩余的毫秒数
-                let hours = Math.floor(leave1 / (3600 * 1000));
-                //计算相差分钟数
-                let leave2 = leave1 % (3600 * 1000);     //计算小时数后剩余的毫秒数
-                let minutes = Math.floor(leave2 / (60 * 1000));
-                //计算相差秒数
-                let leave3 = leave2 % (60 * 1000);     //计算分钟数后剩余的毫秒数
-                let seconds = Math.round(leave3 / 1000);
-                this.result = {
-                    days: days,
-                    hours: hours,
-                    minutes: minutes,
-                    seconds: seconds,
-                };
-                this.tag = this.weather[Math.ceil(Math.random() * 4)];
-                this.linked = !this.linked;
-                let HTMLTitle = days + ' ☀️ ' + hours + ':' + minutes + ':' + seconds;
-                document.getElementsByTagName("title")[0].innerText = HTMLTitle;
-                document.title = HTMLTitle;
-            }, 1000);
-            let tags = '🐶^🐱^🐭^🐹^🐰^🦊^🐻^🐼^🐨^🐯^🦁^🐮^🐷^🐸^🐵^🐔^🐧^🐦^🐤^🦆^🦅^🦉^🦇^🐺^🐗^🐴^🦄^🐝^🐛^🦋^🐌^🐞^🐜^🦟^🦗^🕷^🦂^🐢^🐍^🦎^🦖^🦕^🐙^🦑^🦐^🦞^🦀^🐡^🐠^🐟^🐬^🐳^🐋^🦈^🐊^🐅^🐆^🦓^🦍^🐘^🦛^🦏^🐪^🐫^🦒^🦘^🐃^🐂^🐄^🐎^🐖^🐏^🐑^🦙^🐐^🦌^🐕^🐩^🐈^🐓^🦃^🦚^🦜^🦢^🕊^🐇^🦝^🦡^🐁^🐀^🐿^🦔^🐲^🦧^🦮^🦥^🦦^🦨^🦩';
-            this.postTags = tags.split('^');
+            this.initialize();
+        },
+        beforeDestroy() {
+            this.titleRing.destroy();
         },
         methods: {
-            getMessageList() {
-                return new Promise(
-                    (resolve, reject) => {
-                        let xhr = new XMLHttpRequest();
-                        xhr.open('get', `${this.$util.getServerUrl()}data/api/data/messageList`, true);
-                        xhr.send();
-                        xhr.onload = () => {
-                            switch (xhr.status) {
-                                case 200:
-                                    let data = JSON.parse(xhr.response);
-                                    this.messageList = data;
-                                    (data && data.length > 0) ? resolve() : reject();
-                                    break;
-                            }
-                        };
+            initialize() {
+                DataInterface.getMessages().then(
+                    data => {
+                        this.messageList = data;
+                        (data && data.length > 0) ? this.showBarrage() : null;
+                    }
+                );
+
+                this.loop.run(
+                    () => {
+                        let title = this.titleRing.source.value;
+                        document.getElementsByTagName("title")[0].innerText = title;
+                        document.title = title;
+                        this.titleRing.next();
                     }
                 );
             },
 
             showPostDialog() {
-                let random = this.$util.getRandom(this.postTags.length - 1);
-                this.postTag = this.postTags[random];
-                let value = prompt(this.postTag);
+                let postTag = Avatar.getRandomAvatar();
+                let value = prompt(postTag);
                 if (value) {
                     if (value.length <= 15) {
                         value = value.trim();
-                        let xhr = new XMLHttpRequest();
-                        xhr.open('post', `${this.$util.getServerUrl()}data/api/data/message`, true);
-                        xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-                        xhr.send(JSON.stringify({mac: this.postTag, value: value}));
-                        xhr.onload = () => {
-                            switch (xhr.status) {
-                                case 200:
-                                    if (xhr.response) {
-                                        let center = document.getElementsByClassName('center')[0];
-                                        let barrage = this.buildBarrage(
-                                            center.clientWidth, center.clientHeight,
-                                            this.postTag, value
-                                        );
-                                        center.append(barrage);
-                                        this.launchBarrage(barrage).then(
-                                            () => center.removeChild(barrage)
-                                        );
-                                    }
-                                    break;
+                        DataInterface.putMessage(
+                            JSON.stringify({mac: postTag, value: value})
+                        ).then(
+                            () => {
+                                let center = document.getElementsByClassName('center')[0];
+                                let barrage = this.buildBarrage(
+                                    center.clientWidth, center.clientHeight,
+                                    postTag, value
+                                );
+                                center.append(barrage);
+                                this.launchBarrage(barrage).then(() => center.removeChild(barrage));
                             }
-                        };
+                        );
                     } else {
                         alert('好长啊');
                     }
@@ -134,27 +84,18 @@
              */
             showBarrage() {
                 let center = document.getElementsByClassName('center')[0];
-                let sort = new Promise(
-                    resolve => {
-                        this.messageList.sort(() => Math.random() > .5 ? -1 : 1);
-                        resolve();
-                    }
-                );
-                sort.then(
-                    () => {
-                        this.messageList.forEach(
-                            (item, index) => {
-                                setTimeout(
-                                    () => {
-                                        let barrage = this.buildBarrage(center.clientWidth, center.clientHeight, item.mac, item.value);
-                                        center.append(barrage);
-                                        this.launchBarrage(barrage).then(
-                                            () => center.removeChild(barrage)
-                                        );
-                                    },
-                                    1000 * index
+                this.messageList.sort(() => Math.random() > .5 ? -1 : 1);
+                this.messageList.forEach(
+                    (item, index) => {
+                        setTimeout(
+                            () => {
+                                let barrage = this.buildBarrage(center.clientWidth, center.clientHeight, item.mac, item.value);
+                                center.append(barrage);
+                                this.launchBarrage(barrage).then(
+                                    () => center.removeChild(barrage)
                                 );
-                            }
+                            },
+                            1000 * index
                         );
                     }
                 );
@@ -170,13 +111,16 @@
              */
             buildBarrage(clientWidth, clientHeight, tag, message) {
                 let el = document.createElement('span');
+                let style = {
+                    position: 'absolute',
+                    left: clientWidth + 'px',
+                    top: this.$util.getRandom(clientHeight - 30) + 'px',
+                    whiteSpace: 'nowrap',
+                    borderRadius: '14px 4px 4px 14px',
+                    background: 'linear-gradient(-5deg, #FED6E3 0%, #A8EDEA 100%)',
+                };
                 el.innerHTML = '&nbsp;' + tag + ':' + message + '&nbsp;';
-                el.style.position = 'absolute';
-                el.style.left = clientWidth + 'px';
-                el.style.top = this.$util.getRandom(clientHeight - 30) + 'px';
-                el.style.whiteSpace = 'nowrap';
-                el.style.borderRadius = '14px 4px 4px 14px';
-                el.style.background = 'linear-gradient(-5deg, #FED6E3 0%, #A8EDEA 100%)';
+                Object.assign(el.style, style);
                 el.addEventListener('click', $event => {
                     document.getElementById('player' + this.$util.getRandom(5)).play();
                     $event.target.style.animation = 'shake 0.5s';
@@ -231,34 +175,6 @@
             background-color: #EDEDED;
             box-shadow: 0 0 6px #333333;
             border-radius: 0 0 0.4em 0.4em;
-        }
-
-        .timer {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            /*display: flex;*/
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background-color: #EDEDED;
-            box-shadow: 0 0 6px #333333;
-            border-radius: 0 0 0.4em 0.4em;
-            font-weight: lighter;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-
-            .number {
-                font-weight: normal;
-                font-size: 1em;
-                color: black;
-            }
-
-            .day {
-                margin: 0;
-                padding: 0;
-                animation: rotate .8s linear infinite;
-                -webkit-animation: rotate .8s linear infinite;
-            }
         }
 
         .center {

@@ -1,4 +1,4 @@
-export class Util {
+export default class Util {
     static getRandom(range) {
         return Math.round(Math.random() * range);
     }
