@@ -4,6 +4,6 @@ export default class Util {
     }
 
     static getServerUrl() {
-        return 'http://leenwong.cn/';
+        return location.protocol + '//leenwong.cn/';
     }
 }

@@ -1,5 +1,5 @@
 export default class DataInterface {
-    static ServerUrl = 'http://leenwong.cn/';
+    static ServerUrl = location.protocol + '//leenwong.cn/';
 
     static getXMLHttpRequest(method, url) {
         let xhr = new XMLHttpRequest();

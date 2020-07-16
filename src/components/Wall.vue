@@ -1,12 +1,12 @@
 <template>
     <div class="wall">
         <div class="player" style="display: none">
-            <audio id="player0" src="http://leenwong.cn/get/voice/1.wav"></audio>
-            <audio id="player1" src="http://leenwong.cn/get/voice/2.wav"></audio>
-            <audio id="player2" src="http://leenwong.cn/get/voice/3.wav"></audio>
-            <audio id="player3" src="http://leenwong.cn/get/voice/4.wav"></audio>
-            <audio id="player4" src="http://leenwong.cn/get/voice/5.wav"></audio>
-            <audio id="player5" src="http://leenwong.cn/get/voice/6.wav"></audio>
+            <audio id="player0" src="https://leenwong.cn/get/voice/1.wav"></audio>
+            <audio id="player1" src="https://leenwong.cn/get/voice/2.wav"></audio>
+            <audio id="player2" src="https://leenwong.cn/get/voice/3.wav"></audio>
+            <audio id="player3" src="https://leenwong.cn/get/voice/4.wav"></audio>
+            <audio id="player4" src="https://leenwong.cn/get/voice/5.wav"></audio>
+            <audio id="player5" src="https://leenwong.cn/get/voice/6.wav"></audio>
         </div>
         <div class="bar"></div>
         <div class="center"></div>
